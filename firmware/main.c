@@ -21,7 +21,7 @@ enum SystemState {
 
 uint32_t system_state = SystemStateInit;
 
-uint32_t motor_power = motor_get_max_power();
+uint32_t motor_power = 0;
 uint32_t motor_measurement_timer = 1;
 uint32_t state_timer = 1;
 int32_t last_position = 0;
@@ -30,18 +30,13 @@ int32_t last_position = 0;
 // Main loop
 
 void tick(uint32_t millis, uint32_t dt_micros) {
-  while (true) {
-    int32_t c = getchar_timeout_us(0);
-    if (c != PICO_ERROR_TIMEOUT) handle_uart_input(c);
-    else break;
-  }
-
   if (millis >= motor_measurement_timer) {
     int32_t position = ripplecounter_get_position_counts();
+    int32_t delta_position = position - last_position;
 
-    printf("motor current (mA): %d", ripplecounter_get_current_ma());
-    printf("position (counts): %d", position);
-    printf("speed (counts/s): %d", (position - lastPosition) * 1000 / MotorMeasurementIntervalMs);
+    printf("motor current (mA): %d\n", ripplecounter_get_current_ma());
+    printf("position (counts): %d\n", position);
+    printf("speed (counts/s): %d\n\n", (delta_position > 0 ? delta_position : -delta_position) * 1000 / MotorMeasurementIntervalMs);
 
     motor_measurement_timer = millis + MotorMeasurementIntervalMs;
     last_position = position;
@@ -72,6 +67,7 @@ int main() {
   stdio_init_all();
 
   ripplecounter_motor_init();
+  motor_power = motor_get_max_power();
 
   uint64_t micros;
   uint32_t dt;
