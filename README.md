@@ -1,12 +1,22 @@
 # ripplecounter
 
+![](images/main.jpg)
+
 ## What?
 
-* Control the position and speed of a brushed DC motor, *any* brushed DC motor.
+* Control the position and speed of a brushed DC motor, *any* brushed DC motor
 * No sensors, electromechanical components, or extra wiring needed
 * Measure motor current with no extra complexity or cost
 * Lower resolution than an encoder, but good enough for many applications
 * Use almost any microcontroller, not just a Raspberry Pi Pico
+
+### How Does It Work?
+
+DC motors work internally by using a commutator and brushes, essentially a rotary switch that applies power to each of the motor’s coils in sequence as it rotates. By sensing, amplifying, and filtering the current flowing through the motor, the current ripples that occur as the motor rotates and each coil is energized can be counted by a microcontroller.
+
+### How Well Does It Work?
+
+If component values for the signal conditioning circuit are selected properly, *very* well.
 
 ## Circuit Design
 
@@ -41,12 +51,21 @@ The ripplecounter development board incorporates a Raspberry Pi Pico microcontro
 
 ![](images/pcb%203d.png)
 
+![](images/pcb%20top.jpg)
+
+![](images/pcb%20bottom.jpg)
+
+![](images/pcbs%20assembled.jpg)
+The top PCB is minimally assembled for manually testing the signal conditioning circuit; the bottom PCB has been modified to control a camera slider for focus stacking macrophotography.
+
 ### License
 The schematic is in the public domain - you are free to use this circuit design for any purpose, without attribution. The PCB layout and Gerber files for the development board  are released under the CERN Open Hardware Licence Version 2 - Weakly Reciprocal (CERN-OHL-W V2).
 
 ## Firmware
 
 Basic firmware using the Raspberry Pi Pico C SDK is provided, which moves the motor while printing the position, speed, and current draw via UART. All important constants are documented in `ripplecounter_motor.c`.
+
+Note: When used with the DRV8\*21 motor controller on the development board, this firmware brakes the motor (as opposed to letting it coast) when it is not running, which is desirable for applications that require position control. If the motor is forcibly rotated while it is not running, the change in position will be detected via the ripple counter circuit, but sensing the *direction* of rotation is not implemented. If this functionality is needed, it can be implemented by sampling the motor current value read through the ADC, which will be negative or positive depending on which direction the motor is being turned.
 
 ### License
 
