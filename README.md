@@ -16,14 +16,14 @@ DC motors work internally by using a commutator and brushes, essentially a rotar
 
 ### How Well Does It Work?
 
-If component values for the signal conditioning circuit are selected properly, *very* well.
+If component values for the signal conditioning circuit are selected properly, surprisingly well.
 
 ## Circuit Design
 
 ![](images/schematic.png)
 [Schematic as PDF](pcb/schematic%20rev1%2020230427-01.pdf)
 
-The signal conditioning circuit is based on the design described in [Texas Instruments application note TIDA-01421](https://www.ti.com/lit/ug/tidud30a/tidud30a.pdf?ts=1682413672035) and [Microchip application note AN3049](http://ww1.microchip.com/downloads/en/Appnotes/Sensorless-Position-Control-of-Brushed-DC-Motor-Using-Ripple-Counting-Technique-00003049A.pdf). The initial current sense amplifier is implemented using the Texas Instruments INA181 IC (U202) with a current sense resistor directly in series with the motor, allowing for bidirectional current sensing. The remaining amplifier and filtering stages are implemented using an LM324 (U203) general-purpose quad op amp IC. U203B is used as an active bandpass filter, which works with two other RC low-pass filters to eliminate high frequency noise and low-frequency oscillations in current caused by varying load on the motor. U203C is used to subtract large and relatively slow changes in the signal, such as the motor's inrush current spike. U203D is used as a comparator with hysteresis to generate a clean output signal.
+The signal conditioning circuit is based on the designs described in [Texas Instruments application note TIDA-01421](https://www.ti.com/lit/ug/tidud30a/tidud30a.pdf?ts=1682413672035) and [Microchip application note AN3049](http://ww1.microchip.com/downloads/en/Appnotes/Sensorless-Position-Control-of-Brushed-DC-Motor-Using-Ripple-Counting-Technique-00003049A.pdf). The initial current sense amplifier is implemented using the [Texas Instruments INA181 IC](https://www.mouser.com/datasheet/2/405/ina181-1109801.pdf) (U202) with a current sense resistor directly in series with the motor, allowing for bidirectional current sensing. The remaining amplifier and filtering stages are implemented using an LM324 (U203) general-purpose quad op amp. U203B is used as an active bandpass filter, which works with two other RC low-pass filters to eliminate high frequency noise and low-frequency oscillations in current caused by varying load on the motor. U203C is used to subtract large and relatively slow changes in the signal, such as the motor's inrush current spike. U203D is used as a comparator with hysteresis to generate a clean output signal.
 
 ![](images/scope.png)
 Purple: filtered, amplified motor current waveform (TP211); Yellow: output signal (TP215)
@@ -65,7 +65,7 @@ The schematic is in the public domain - you are free to use this circuit design 
 
 Basic firmware using the Raspberry Pi Pico C SDK is provided, which moves the motor while printing the position, speed, and current draw via UART. All important constants are documented in `ripplecounter_motor.c`.
 
-Note: When used with the DRV8\*21 motor controller on the development board, this firmware brakes the motor (as opposed to letting it coast) when it is not running, which is desirable for applications that require position control. If the motor is forcibly rotated while it is not running, the change in position will be detected via the ripple counter circuit, but sensing the *direction* of rotation is not implemented. If this functionality is needed, it can be implemented by sampling the motor current value read through the ADC, which will be negative or positive depending on which direction the motor is being turned.
+Note: When used with the DRV8x21 motor controller on the development board, this firmware brakes the motor (as opposed to letting it coast) when it is not running, which is desirable for applications that require position control. If the motor is forcibly rotated while it is not running, the change in position will be detected via the ripple counter circuit, but sensing the *direction* of rotation is not implemented. If this functionality is needed, it can be implemented by sampling the motor current value read through the ADC, which will be negative or positive depending on which direction the motor is being turned.
 
 ### License
 
